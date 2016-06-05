@@ -2,14 +2,14 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<title>GoDown Previewer</title>
+	<title>Godown Preview</title>
 	<link rel="stylesheet" href="/static/github-markdown.css">
 	<link rel="stylesheet" href="/static/github.min.css">
 	<link rel="stylesheet" href="/static/style.css">
 	<script src="/static/highlight.min.js"></script>
 	<script>
 		window.onload = function() {
-			var ws = new WebSocket('ws://{{.Host}}:{{.Port}}/connect');
+			var ws = new WebSocket('ws://{{.Host}}:{{.Port}}/connect?id={{.FileID}}');
 			var container = document.getElementById('container');
 			ws.onmessage = function(e) {
 				var html = JSON.parse(e.data).render;

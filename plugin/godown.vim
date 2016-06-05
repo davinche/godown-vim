@@ -24,15 +24,15 @@ endif
 
 function! s:GodownPreview()
 	if has('win32')
-		silent! call system("start /B godown_win -p " . g:godown_port .
+		silent! call system("start /B godown_win.exe -p " . g:godown_port .
 					\ " start \"" . expand('%:p') . "\"")
 	else
 		if has('nvim')
-			if exists('s:job')
-				call jobstop(s:job)
-			endif
 			let s:job = jobstart(s:godown_bin . " -p " . g:godown_port .
 						\ " start \"" . expand('%:p') . "\"")
+			if !exists("g:godown_daemon")
+				let g:godown_daemon = s:job
+			endif
 		else
 			call system(s:godown_bin . " -p " . g:godown_port .
 						\ " start \"" . expand('%:p') . "\" & ")
@@ -42,13 +42,13 @@ endfunction
 
 function! s:GodownKill()
 	if has('win32')
-		silent! call system("start /B godown_win -p " . g:godown_port . " stop")
+		silent! call system("start /B godown_win.exe -p " . g:godown_port . " stop")
 	else
 		call system(s:godown_bin. " -p " . g:godown_port . " stop")
 		if has('nvim')
-			if exists('s:job')
-				call jobstop(s:job)
-				unlet s:job
+			if exists('g:godown_daemon')
+				call jobstop(g:godown_daemon)
+				unlet g:godown_daemon
 			endif
 		endif
 	endif
