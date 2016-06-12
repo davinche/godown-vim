@@ -116,8 +116,6 @@ function! s:cleanup()
 		for item in b:cleanup
 			let s:refcount[item] = s:refcount[item] - 1
 			if s:refcount[item] == 0
-				echom item
-				echom "OK"
 				call system(s:godown_bin . ' -p ' . g:godown_port .
 							\' stop ' . item . ' &')
 				unlet s:refcount[item]
