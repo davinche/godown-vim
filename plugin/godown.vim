@@ -65,7 +65,7 @@ endfunction
 
 function! s:refresh(shouldLaunch)
 	let l:bufnr = bufnr('%')
-	let l:content = join(getline(1, "$"), "\n\n")
+	let l:content = join(getline(1, "$"), "\n")
 	if has('nvim')
 		let l:cmd = s:godown_bin . ' -p ' . g:godown_port .
 					\(a:shouldLaunch ?' -l ' : ' ') .
