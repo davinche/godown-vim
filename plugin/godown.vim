@@ -2,6 +2,7 @@ command! GodownPreview :call s:GodownPreview()
 command! GodownKill :call s:GodownKillServer()
 command! GodownToggle :call s:GodownToggle()
 command! GodownLiveToggle :call s:GodownLiveToggle()
+command! GodownClean :call s:cleanup()
 
 let s:path = fnamemodify(resolve(expand('<sfile>:p')), ':h:h') . '/build'
 
@@ -100,7 +101,6 @@ function! s:GodownLiveToggle()
 		augroup livetoggle
 			autocmd! * <buffer>
 			autocmd CursorHold,CursorHoldI,CursorMoved,CursorMovedI <buffer> call s:shouldRefresh()
-			autocmd BufWinLeave <buffer> call s:cleanup()
 		augroup END
 		call s:refresh(1)
 	else
@@ -121,6 +121,7 @@ function! s:cleanup()
 				unlet s:refcount[item]
 			endif
 		endfor
+		unlet b:cleanup
 	endif
 endfunction
 
