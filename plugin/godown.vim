@@ -28,8 +28,6 @@ endif
 
 function! s:GodownPreview()
 	let l:path = expand('%:p')
-	call s:addCleanup(l:path)
-
 	if has('nvim')
 		let l:job = jobstart(s:godown_bin . ' -p ' . g:godown_port . ' -l ' .
 					\ ' start "' . l:path . '"')
@@ -54,9 +52,13 @@ endfunction
 
 function! s:GodownToggle()
 	if !exists('b:toggle')
+		call s:addCleanup(expand('%:p'))
 		call s:GodownPreview() | let b:toggle = 1
+		echo "GodownToggle[ON]"
 	else
-		call s:GodownKill() | unlet b:toggle
+		call s:delCleanup(expand('%:p'))
+		unlet b:toggle
+		echo "GodownToggle[OFF]"
 	endif
 endfunction
 
@@ -95,18 +97,20 @@ function! s:shouldRefresh()
 endfunction
 
 function! s:GodownLiveToggle()
-	call s:addCleanup(string(bufnr('%')))
 	if !exists('b:livetoggle')
+		call s:addCleanup(string(bufnr('%')))
 		let b:livetoggle = b:changedtick
 		augroup livetoggle
 			autocmd! * <buffer>
 			autocmd CursorHold,CursorHoldI,CursorMoved,CursorMovedI <buffer> call s:shouldRefresh()
 		augroup END
 		call s:refresh(1)
+		echo "GodownLiveToggle[ON]"
 	else
 		autocmd! livetoggle
 		unlet b:livetoggle
-		call s:cleanup()
+		call s:delCleanup(string(bufnr('%')))
+		echo "GodownLiveToggle[OFF]"
 	endif
 endfunction
 
@@ -114,12 +118,7 @@ endfunction
 function! s:cleanup()
 	if exists('b:cleanup')
 		for item in b:cleanup
-			let s:refcount[item] = s:refcount[item] - 1
-			if s:refcount[item] == 0
-				call system(s:godown_bin . ' -p ' . g:godown_port .
-							\' stop ' . item . ' &')
-				unlet s:refcount[item]
-			endif
+			call s:removeRefCount(item)
 		endfor
 		unlet b:cleanup
 	endif
@@ -128,11 +127,20 @@ endfunction
 function! s:addCleanup(item)
 	if !exists('b:cleanup')
 		let b:cleanup = [a:item]
-		call s:addRefCount(a:item)
 	else
 		if index(b:cleanup, a:item) == -1
-			add(b:cleanup, a:item)
-			call s:addRefCount(a: item)
+			call add(b:cleanup, a:item)
+		endif
+	endif
+	call s:addRefCount(a:item)
+endfunction
+
+function! s:delCleanup(item)
+	if exists('b:cleanup')
+		let l:index = index(b:cleanup, a:item)
+		if l:index >= 0
+			call remove(b:cleanup, l:index)
+			call s:removeRefCount(a:item)
 		endif
 	endif
 endfunction
@@ -149,3 +157,15 @@ function! s:addRefCount(item)
 	endif
 endfunction
 
+function! s:removeRefCount(item)
+	if exists('s:refcount')
+		if has_key(s:refcount, a:item)
+			let s:refcount[a:item] = s:refcount[a:item] - 1
+			if s:refcount[a:item] == 0
+				call remove(s:refcount, a:item)
+				call system(s:godown_bin . ' -p ' . g:godown_port .
+							\' stop ' . a:item . ' &')
+			endif
+		endif
+	endif
+endfunction
