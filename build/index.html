@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Godown Preview</title>
+	<link rel="stylesheet" href="/static/github-markdown.css">
+	<link rel="stylesheet" href="/static/github.min.css">
+	<style>#container{width:980px;margin:0 auto;padding:45px;border:1px solid #ddd;}</style>
+	<script src="/static/highlight.min.js"></script>
+	<script>
+		window.onload = function() {
+			var ws = new WebSocket('ws://{{.Host}}:{{.Port}}/connect?id={{.FileID}}');
+			var container = document.getElementById('container');
+			ws.onmessage = function(e) {
+				var html = JSON.parse(e.data).render;
+				container.innerHTML = html;
+				Array.prototype.slice.call(container.querySelectorAll('pre code'))
+				.forEach(function(block) {
+					hljs.highlightBlock(block);
+				});
+			};
+		}
+	</script>
+</head>
+<body>
+	<div id="container" class="markdown-body"></div>
+</body>
+</html>
