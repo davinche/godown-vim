@@ -1,5 +1,6 @@
 godown.vim
-==========
+===========
+
 ![gif](https://github.com/davinche/godown-vim/blob/static/gif.gif?raw=true)
 
 A vim plugin for [Godown][gd].
@@ -19,6 +20,9 @@ The following commands are available
 
 " Toggle the Godown server
 :GodownToggle
+
+" Live Preview
+:GodownLiveToggle
 ```
 
 ## Configuration
