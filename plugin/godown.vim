@@ -27,16 +27,23 @@ if !exists('s:godown_bin')
 endif
 
 function! s:GodownPreview()
-	let l:path = expand('%:p')
+	let path = expand('%:p')
 	if has('nvim')
-		let l:job = jobstart(s:godown_bin . ' -p ' . g:godown_port . ' -l ' .
-					\ ' start "' . l:path . '"')
-		if !exists("s:godown_daemon")
-			let s:godown_daemon = l:job
+		let job = jobstart(s:godown_bin . ' -p ' . g:godown_port . ' -l ' .
+					\ ' start "' . path . '"')
+		if !exists('s:godown_daemon')
+			let s:godown_daemon = job
+		endif
+    elseif exists('*job_start')
+        let command = [s:godown_bin, '-p', g:godown_port, '-l', 'start', path]
+        let options = { 'in_io': 'null', 'out_io': 'null', 'err_io': 'null' }
+		let job = job_start(command, options)
+		if !exists('s:godown_daemon')
+			let s:godown_daemon = job
 		endif
 	else
 		call system(s:godown_bin . ' -p ' . g:godown_port . ' -l ' .
-					\ ' start "' . l:path . '" &')
+					\ ' start "' . path . '" &')
 	endif
 endfunction
 
@@ -76,9 +83,20 @@ function! s:refresh(shouldLaunch)
 		let l:job = jobstart(l:cmd)
 		let l:stat = jobsend(l:job, l:content)
 		call jobclose(l:job, 'stdin')
-
-		if !exists("s:godown_daemon")
+		if !exists('s:godown_daemon')
 			let s:godown_daemon = l:job
+		endif
+    elseif exists('*job_start')
+		let cmd = [s:godown_bin, '-p', g:godown_port, (a:shouldLaunch ? '-l' : ''), 'send', string(l:bufnr)]
+        let options = { 'in_io': 'pipe', 'in_mode': 'raw', 'out_io': 'null', 'err_io': 'null' }
+        let job = job_start(cmd, options)
+        let channel = job_getchannel(job)
+        call ch_sendraw(channel, l:content)
+        call ch_close(channel)
+		if !exists('s:godown_daemon')
+			let s:godown_daemon = job
+        else
+            call job_stop(job)
 		endif
 	else
 		call system(s:godown_bin . ' -p ' . g:godown_port .
