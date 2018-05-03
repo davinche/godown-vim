@@ -4,6 +4,12 @@ command! GodownToggle :call s:GodownToggle()
 command! GodownLiveToggle :call s:GodownLiveToggle()
 command! GodownClean :call s:cleanup()
 
+nnoremap <silent> <Plug>(GodownPreview) :call <SID>GodownPreview()<CR>
+nnoremap <silent> <Plug>(GodownKill) :call <SID>GodownKillServer()<CR>
+nnoremap <silent> <Plug>(GodownToggle) :call <SID>GodownToggle()<CR>
+nnoremap <silent> <Plug>(GodownLiveToggle) :call <SID>GodownLiveToggle()<CR>
+nnoremap <silent> <Plug>(GodownClean) :call <SID>cleanup()<CR>
+
 let s:path = fnamemodify(resolve(expand('<sfile>:p')), ':h:h') . '/build'
 
 if !exists('g:godown_port')

@@ -23,6 +23,9 @@ The following commands are available
 
 " Live Preview
 :GodownLiveToggle
+
+" You can also add key bindings to preview your markdown
+nmap <leader>md <Plug>(GodownLiveToggle)
 ```
 
 ## Configuration
