@@ -1,5 +1,5 @@
 augroup godown
-	if g:godown_autorun
+	if get(g:, 'godown_autorun', 0)
 		autocmd! BufWinEnter <buffer> GodownPreview
 	endif
 	autocmd! BufWinLeave <buffer> GodownClean
